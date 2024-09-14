@@ -13,3 +13,6 @@ run:
 fix:
     cargo fmt
     cargo fix --allow-dirty --allow-staged
+
+show-help:
+    cargo run -- --help
