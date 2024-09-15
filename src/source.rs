@@ -1,3 +1,5 @@
+use anyhow::{anyhow, Result};
+use std::path::Path;
 use std::path::PathBuf;
 
 const TERA_GLOB_ALL_PATTERN: &str = "**/*";
@@ -9,9 +11,9 @@ pub struct Source {
 }
 
 impl Source {
-    pub fn new(dir: PathBuf) -> Self {
+    pub fn new(dir: &Path) -> Self {
         Self {
-            dir,
+            dir: dir.to_path_buf(),
             pattern: TERA_GLOB_ALL_PATTERN.to_string(),
         }
     }
@@ -22,9 +24,14 @@ impl Source {
     }
 }
 
-impl From<PathBuf> for Source {
-    fn from(value: PathBuf) -> Self {
-        Source::new(value)
+impl TryFrom<&Path> for Source {
+    type Error = anyhow::Error;
+    fn try_from(value: &Path) -> Result<Self> {
+        if !value.exists() {
+            return Err(anyhow!("could not read source `{}`", value.display()));
+        }
+
+        Ok(Source::new(value))
     }
 }
 

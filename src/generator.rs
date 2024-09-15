@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -7,43 +8,62 @@ use std::path::PathBuf;
 use super::*;
 
 use anyhow::Result;
-use args::Args;
+use data::Data;
+use output::Output;
+use source::Source;
 use tera::{Context, Tera};
 
-pub struct Engine;
-
-#[derive(Default)]
-pub struct Report {
-    rendered_success: Vec<PathBuf>,
-    // ( template, error message )
-    rendered_failures: Vec<(String, String)>,
+pub struct Generator {
+    context: Context,
 }
 
-impl Engine {
-    pub fn render_to_disk(args: Args) -> Result<Report> {
+#[derive(Debug, Default)]
+pub struct Report {
+    pub rendered_success: Vec<PathBuf>,
+    // ( template, error message )
+    pub failures: Vec<(String, String)>,
+}
+
+impl Display for Report {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for success in &self.rendered_success {
+            write!(f, "Generated: {}", success.display())?;
+        }
+
+        for (templ, err) in &self.failures {
+            write!(f, "Failed to Generate: {} \n because {}", &templ, &err)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Generator {
+    pub fn new(data: Data) -> Result<Self> {
+        let context = Context::from_serialize(data)?;
+        Ok(Self { context })
+    }
+
+    pub fn render_to_disk(&self, source: Source, output: Output) -> Result<Report> {
         // load all files from template
         let tera = Tera::new(
-            &args
-                .source
+            &source
                 .dir
                 .canonicalize()?
-                .join(args.source.pattern)
+                .join(source.pattern)
                 .display()
                 .to_string(),
         )?;
-        let output_dir = args.output.as_path();
-        let context = Context::from_serialize(args.data)?;
+        let output_dir = output.as_path();
 
         let mut report = Report::default();
         for name in tera.get_template_names() {
-            match generate(name, &context, output_dir, &tera) {
+            match generate(name, &self.context, output_dir, &tera) {
                 Ok(generated_filepath) => {
                     report.rendered_success.push(generated_filepath);
                 }
                 Err(err) => {
-                    report
-                        .rendered_failures
-                        .push((name.to_string(), err.to_string()));
+                    report.failures.push((name.to_string(), err.to_string()));
                 }
             }
         }

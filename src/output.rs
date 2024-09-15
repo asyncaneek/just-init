@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+use anyhow::Result;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -9,8 +11,13 @@ impl Output {
     }
 }
 
-impl From<PathBuf> for Output {
-    fn from(value: PathBuf) -> Self {
-        Output(value)
+impl TryFrom<&Path> for Output {
+    type Error = anyhow::Error;
+    fn try_from(value: &Path) -> Result<Self> {
+        if !value.exists() {
+            return Err(anyhow!("could not read source `{}`", value.display()));
+        }
+
+        Ok(Output(value.to_path_buf()))
     }
 }
