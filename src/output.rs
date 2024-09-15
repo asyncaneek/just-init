@@ -1,13 +1,16 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-pub struct Output {
-    dir: PathBuf,
+#[derive(Clone, Debug)]
+pub struct Output(pub PathBuf);
+
+impl Output {
+    pub fn as_path(&self) -> &Path {
+        &self.0
+    }
 }
 
-impl Default for Output {
-    fn default() -> Self {
-        Output {
-            dir: PathBuf::from("."),
-        }
+impl From<PathBuf> for Output {
+    fn from(value: PathBuf) -> Self {
+        Output(value)
     }
 }
