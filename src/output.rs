@@ -1,5 +1,6 @@
-use anyhow::anyhow;
+use anyhow::Context;
 use anyhow::Result;
+use std::fs;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -15,7 +16,9 @@ impl TryFrom<&Path> for Output {
     type Error = anyhow::Error;
     fn try_from(value: &Path) -> Result<Self> {
         if !value.exists() {
-            return Err(anyhow!("could not read source `{}`", value.display()));
+            fs::create_dir_all(value).with_context(|| {
+                format!("failed to create output directory at {}", value.display())
+            })?;
         }
 
         Ok(Output(value.to_path_buf()))
