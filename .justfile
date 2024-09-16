@@ -1,5 +1,8 @@
+
 # Set shell for Windows OSs:
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+
+mod examples
 
 default:
     @just --list --unsorted
@@ -11,7 +14,7 @@ run:
     cargo run
 
 test:
-    cargo test --quiet
+    cargo test
 
 fix:
     cargo fmt
