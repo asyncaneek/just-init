@@ -55,7 +55,7 @@ fn generate_file() -> Result<()> {
 
     cmd.assert().success();
     output.assert(predicate::path::exists());
-    output.child("source.txt").assert(predicate::path::exists());
+    source.assert(predicate::path::exists());
     output.close()?;
 
     Ok(())
