@@ -36,27 +36,37 @@ fn generate_file() -> Result<()> {
 }
 "#;
 
-    let source = assert_fs::NamedTempFile::new("source.txt")?;
+    const OUTPUT_DATA_CONTENT: &str = r#"
+just_namespace::just_class
+"#;
+
+    let source_dir = assert_fs::TempDir::new()?;
+    let source = source_dir.child("source.txt");
     source.write_str(FILE_SOURCE_CONTENT)?;
 
     let data = assert_fs::NamedTempFile::new("data.json")?;
     data.write_str(FILE_DATA_CONTENT)?;
 
-    let output = assert_fs::TempDir::new()?;
+    let output_dir = assert_fs::TempDir::new()?;
+
+    source_dir.assert(predicate::path::exists());
+    source.assert(predicate::path::exists());
+    output_dir.assert(predicate::path::exists());
 
     let mut cmd = Command::cargo_bin("just-init")?;
 
     cmd.arg("--source")
-        .arg(source.path())
+        .arg(source_dir.path())
         .arg("--data")
         .arg(data.path())
         .arg("--output")
-        .arg(output.path());
+        .arg(output_dir.path());
 
     cmd.assert().success();
-    output.assert(predicate::path::exists());
-    source.assert(predicate::path::exists());
-    output.close()?;
+    let output_file = output_dir.child("source.txt");
+    output_file.assert(predicate::path::exists());
+    output_file.assert(predicates::ord::eq(OUTPUT_DATA_CONTENT));
+    output_dir.close()?;
 
     Ok(())
 }

@@ -1,1 +1,3 @@
+{% for class in classes -%}
 {{namespace}}::{{class}}
+{% endfor %}
