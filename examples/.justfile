@@ -1,5 +1,5 @@
-# Set shell for Windows OSs:
-set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+# Set shell as nushell:
+set shell := ["nu", "-c"]
 
 default:
     @just --list --unsorted
