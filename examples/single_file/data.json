@@ -1,4 +1,7 @@
 {
     "namespace":"just_namespace",
-    "class":"just_class"
+    "classes":[
+        "A_Class",
+        "B_Class"
+    ]
 }

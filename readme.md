@@ -13,7 +13,9 @@ Options:
 
 Details:
 
-The internal program uses [Tera](https://crates.io/crates/tera) to generate files with jinja templates embedded within. A pre-processing step is done to generate the files from a path file that also may be described with jinja templates. 
+The internal program uses [Tera](https://crates.io/crates/tera) to generate files with jinja templates embedded within. A pre-processing step is done to generate the files from a path file that also may be described with jinja templates.
+
+Docs: https://keats.github.io/tera/docs/
 
 For example:
 
