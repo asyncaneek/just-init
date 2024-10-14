@@ -12,7 +12,7 @@ fn file_doesnt_exist() -> Result<()> {
 
     cmd.arg("--source")
         .arg(bad_file_path)
-        .arg("--data")
+        .arg("--data-file") // Updated argument
         .arg(bad_file_path)
         .arg("--output")
         .arg(bad_file_path);
@@ -57,7 +57,7 @@ just_namespace::just_class
 
     cmd.arg("--source")
         .arg(source_dir.path())
-        .arg("--data")
+        .arg("--data-file")
         .arg(data.path())
         .arg("--output")
         .arg(output_dir.path());

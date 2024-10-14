@@ -11,3 +11,7 @@ single-file:
 
 single-path:
     cargo run -- --data single_path/data.json --source single_path/input --output single_path/out
+
+single-inline:
+    cargo run -- --inline-data "project_name=CppProject" --source cpp_project/input --output cpp_project/out
+
