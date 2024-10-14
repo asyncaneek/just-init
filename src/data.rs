@@ -47,6 +47,8 @@ impl TryFrom<Vec<(String, String)>> for Data {
 
 #[cfg(test)]
 mod tests {
+    use assert_fs::prelude::{FileWriteStr, PathChild};
+
     use super::*;
 
     #[test]
@@ -60,9 +62,9 @@ mod tests {
         let data = Data::try_from(pairs)?;
 
         if let serde_json::Value::Object(map) = &data.0 {
-            assert_eq!(map.get("key1").unwrap().as_str().unwrap(), "value1");
-            assert_eq!(map.get("key2").unwrap().as_str().unwrap(), "value2");
-            assert_eq!(map.get("key3").unwrap().as_str().unwrap(), "value3");
+            assert_eq!(map.get("key1").and_then(|v| v.as_str()), Some("value1"));
+            assert_eq!(map.get("key2").and_then(|v| v.as_str()), Some("value2"));
+            assert_eq!(map.get("key3").and_then(|v| v.as_str()), Some("value3"));
             assert_eq!(map.len(), 3);
         } else {
             panic!("Expected Object, got something else");
@@ -103,9 +105,6 @@ mod tests {
     }
     #[test]
     fn test_data_from_json_file() -> Result<()> {
-        use std::fs::File;
-        use std::io::Write;
-
         let json_content = r#"
         {
             "project_name": "MyAwesomeProject",
@@ -116,10 +115,9 @@ mod tests {
         "#;
 
         let temp_dir = assert_fs::TempDir::new()?;
-        let file_path = temp_dir.path().join("test_data.json");
-        let mut file = File::create(&file_path)?;
-        file.write_all(json_content.as_bytes())?;
-        let data = Data::try_from(file_path.as_path())?;
+        let file_path = temp_dir.child("test_data.json");
+        file_path.write_str(json_content)?;
+        let data = Data::try_from(file_path.path())?;
 
         if let serde_json::Value::Object(map) = &data.0 {
             assert_eq!(
@@ -133,7 +131,7 @@ mod tests {
                 Some(
                     serde_json::json!(["serde", "tokio", "reqwest"])
                         .as_array()
-                        .unwrap()
+                        .expect("JSON array should be valid")
                 )
             );
             assert_eq!(map.len(), 4);
